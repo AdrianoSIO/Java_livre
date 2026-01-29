@@ -9,8 +9,8 @@ L’application vise à offrir un suivi standardisé sur plusieurs années et un
 Architecture technique
 
 L’application est une application lourde reposant sur une architecture MVC (Model – View – Controller).
-La persistance des données est assurée par une base de données MySQL hébergée sur un serveur dédié.
-La modélisation des données s’appuie sur un MCD fourni dans le sous-dossier du projet.
+Les données sont sur une base de données MySQL hébergée sur un serveur.
+La modélisation des données s’appuie sur un MCD fourni dans le sous-dossier du projet \Documents\mcd_bourse_livres.pdf .
 Le respect du CRUD (Create, Read, Update, Delete) est obligatoire pour l’ensemble des entités du système.
 
 Gestion des rôles et des droits
