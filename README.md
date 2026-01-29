@@ -1,5 +1,5 @@
 # Java_livre
-Cette application à pour but la gestion de livre scolaire dans un établissement de sa vente à sa restitution
+
 Présentation du projet
 
 Cette application a pour objectif de gérer le cycle de vie des manuels scolaires mis à disposition des apprenants au sein d’un campus. Elle permet l’achat des manuels, leur attribution aux étudiants, le suivi des emprunts, le rachat et le retour des livres en fin d’année, ainsi qu’un suivi financier détaillé.
