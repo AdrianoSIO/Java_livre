@@ -1,0 +1,15 @@
+Contexte : Les campus mettent à disposition des apprenants des manuels pour les cours
+
+L'application devra permettre une gestion d'achat des manuels scolaires et leurs mises à disposition des élèves ainsi que le rachat à la fin. Et aussi un suivi du Livre intégral quant à qui lui à vendu et de quel manière l'étudiant souhaite t'il payé et si la somme à déjà été réglé.  
+
+L'application permettra donc un suivi standardisé sur plusieurs années, et un suivi financier plus claires pour les utilisateurs 
+
+Chaque utilisateur aura un rôle et ne pourra pas faire les mêmes tâches que les autres l'apprenant pourra voir les livres et seulement les livres qu'il a emprunté, le formateur et l'enseignant ne pourront voir que les livre qu'un étudiant à emprunté
+Le gestionnaire pourra voir et agir sur les livres empruntés (donc il pourra savoir qui à pris quoi et si le paiement est bon), attribué des livres validés le retour des livres en bref il pourra voir et agir sur l'ensemble du système sauf la gestion des utilisateurs. L'administrateur lui pourra supervisé l'ensemble des fonctionnalités et pourra agir sur les utilisateurs et leur rôle. Il pourra aussi faire la création / suppression de rôle et d'utilisateur. 
+
+Respect du CRUD OBLIGATOIRE !!!!!!
+
+L'application lourde sera en architecture MVC et la base de donnée sera gérer par un serveur MySQL 
+
+* Voic MCD qui normalement est dans le même sous-dossier que ce document
+
