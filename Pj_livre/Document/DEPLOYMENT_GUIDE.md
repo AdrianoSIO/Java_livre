@@ -4,8 +4,9 @@
 
 Avant de déployer l'application, assurez-vous que les éléments suivants sont installés :
 
-- **Java Development Kit (JDK)** : version 8 ou supérieure
+- **Java Development Kit (JDK)** : version 24 (ou supérieure - voir `project.properties`)
 - **Apache Ant** : version 1.10 ou supérieure (pour la compilation)
+- **MariaDB** : version 10.5+ (base de données)
 - **Git** : pour cloner le repository
 
 Vérifiez les installations :
@@ -13,11 +14,62 @@ Vérifiez les installations :
 java -version
 javac -version
 ant -version
+mysql --version
 ```
 
 ---
 
-## 🔧 Compilation et Build
+## 🗄️ Configuration de la Base de Données
+
+### 1. Créer la base de données
+
+**Sous Linux/macOS et Windows :**
+```bash
+# Se connecter à MariaDB
+mysql -u root -p
+
+# Exécuter les commandes SQL :
+CREATE DATABASE IF NOT EXISTS livre_scolaire CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'livre_user'@'localhost' IDENTIFIED BY 'votre_mot_de_passe';
+GRANT ALL PRIVILEGES ON livre_scolaire.* TO 'livre_user'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+### 2. Initialiser les tables (si disponible)
+
+Si un script SQL d'initialisation se trouve dans `Pj_livre/Document/` :
+```bash
+mysql -u livre_user -p livre_scolaire < Pj_livre/Document/init_database.sql
+```
+
+---
+
+## 🔧 Configuration de l'Application
+
+### Modifier les paramètres de connexion
+
+Avant la compilation, éditer le fichier source de connexion à la base de données :
+
+**Fichier** : `Pj_livre/src/pj_livre.BDD/CL_connexion.java`
+
+Les paramètres à configurer :
+- **Host** : `localhost` (ou adresse du serveur MariaDB)
+- **Port** : `3306` (port par défaut MariaDB)
+- **Base de données** : `livre_scolaire`
+- **Utilisateur** : `livre_user`
+- **Mot de passe** : `votre_mot_de_passe`
+
+**Exemple de configuration** (à adapter dans le code) :
+```java
+String dbUrl = "jdbc:mariadb://localhost:3306/livre_scolaire";
+String user = "livre_user";
+String password = "votre_mot_de_passe";
+```
+
+---
+
+## 🔨 Compilation et Build
 
 ### Sous Linux/macOS
 
@@ -25,8 +77,11 @@ ant -version
 # Naviguer vers le répertoire du projet
 cd Pj_livre
 
+# Nettoyer les fichiers compilés précédents
+ant clean
+
 # Compiler le projet avec Ant
-ant clean build
+ant build
 
 # Créer le fichier JAR
 ant jar
@@ -40,8 +95,11 @@ ant jar
 # Naviguer vers le répertoire du projet
 cd Pj_livre
 
+# Nettoyer les fichiers compilés précédents
+ant clean
+
 # Compiler le projet avec Ant
-ant clean build
+ant build
 
 # Créer le fichier JAR
 ant jar
@@ -51,7 +109,11 @@ ant jar
 
 ---
 
-## 🚀 Déploiement et Exécution
+## 🚀 Exécution de l'Application
+
+### Point d'entrée
+
+**Classe principale** : `pj_livre.Controllers.C_livre`
 
 ### Sous Linux/macOS
 
@@ -60,7 +122,7 @@ ant jar
 # Depuis le répertoire Pj_livre
 java -jar dist/Pj_livre.jar
 
-# Avec paramètres JVM (si nécessaire)
+# Avec paramètres JVM (augmenter la mémoire si nécessaire)
 java -Xmx512m -Xms256m -jar dist/Pj_livre.jar
 ```
 
@@ -69,8 +131,16 @@ java -Xmx512m -Xms256m -jar dist/Pj_livre.jar
 # Créer le fichier run.sh
 cat > run.sh << 'EOF'
 #!/bin/bash
-cd "$(dirname "$0")"
-java -jar dist/Pj_livre.jar
+# Script de démarrage - Application Gestion de Livre Scolaire
+cd "$(dirname "$0")/Pj_livre"
+
+# Vérifier que la base de données est accessible
+echo "Vérification de la connexion MariaDB..."
+
+# Démarrer l'application
+echo "Démarrage de l'application..."
+java -Xmx512m -Xms256m -jar dist/Pj_livre.jar
+
 EOF
 
 # Rendre le script exécutable
@@ -87,7 +157,7 @@ chmod +x run.sh
 # Depuis le répertoire Pj_livre
 java -jar dist\Pj_livre.jar
 
-# Avec paramètres JVM (si nécessaire)
+# Avec paramètres JVM (augmenter la mémoire si nécessaire)
 java -Xmx512m -Xms256m -jar dist\Pj_livre.jar
 ```
 
@@ -95,8 +165,14 @@ java -Xmx512m -Xms256m -jar dist\Pj_livre.jar
 ```batch
 # Créer le fichier run.bat
 @echo off
-cd /d "%~dp0"
-java -jar dist\Pj_livre.jar
+REM Script de démarrage - Application Gestion de Livre Scolaire
+cd /d "%~dp0Pj_livre"
+
+echo Verification de la connexion MariaDB...
+echo Demarrage de l'application...
+
+java -Xmx512m -Xms256m -jar dist\Pj_livre.jar
+
 pause
 ```
 
@@ -110,67 +186,56 @@ Vous pouvez ensuite double-cliquer sur `run.bat` pour exécuter l'application.
 
 **Sous Linux/macOS :**
 ```bash
-# Créer une archive avec l'application compilée
+# Compiler et générer le JAR
 cd Pj_livre
-ant clean
-ant jar
+ant clean jar
 cd ..
 
-# Créer une archive tar.gz
-tar -czf Pj_livre-dist.tar.gz Pj_livre/dist Pj_livre/Document
+# Créer une archive tar.gz avec l'application compilée
+tar -czf Pj_livre-dist.tar.gz Pj_livre/dist/ Pj_livre/Document/
 
-# Pour déployer, extraire l'archive sur la machine cible
+# Pour déployer sur une autre machine
+# 1. Transférer le fichier Pj_livre-dist.tar.gz
+# 2. Extraire l'archive
 tar -xzf Pj_livre-dist.tar.gz
+# 3. Adapter la configuration de la base de données
+# 4. Exécuter l'application
 ```
 
 **Sous Windows :**
 ```cmd
-# Via PowerShell
+# Compiler et générer le JAR
 cd Pj_livre
-ant clean
-ant jar
+ant clean jar
 cd ..
 
-# Créer un fichier ZIP
-powershell -Command "Compress-Archive -Path Pj_livre\dist, Pj_livre\Document -DestinationPath Pj_livre-dist.zip"
+# Créer un fichier ZIP via PowerShell
+powershell -Command "Compress-Archive -Path 'Pj_livre\dist', 'Pj_livre\Document' -DestinationPath 'Pj_livre-dist.zip' -Force"
 
-# Pour déployer, extraire le ZIP sur la machine cible
+# Pour déployer sur une autre machine
+# 1. Transférer le fichier Pj_livre-dist.zip
+# 2. Extraire le ZIP
+# 3. Adapter la configuration de la base de données
+# 4. Exécuter l'application
 ```
 
 ---
 
-## 🗄️ Configuration de la Base de Données
+## 🔐 Variables JVM Recommandées
 
-Si votre application utilise une base de données (selon le MCD présent dans le dossier Document) :
+Pour optimiser l'exécution sur différents environnements :
 
-### Initialisation de la base de données
+| Paramètre | Valeur | Description |
+|-----------|--------|-------------|
+| `-Xmx` | `512m` | Mémoire maximale allouée |
+| `-Xms` | `256m` | Mémoire minimale allouée |
+| `-Dfile.encoding` | `UTF-8` | Encodage des fichiers |
+| `-Duser.timezone` | `UTC` | Fuseau horaire |
 
-**Sous Linux/macOS :**
+**Exemple complet :**
 ```bash
-# Exemple avec MySQL/MariaDB
-mysql -u root -p < Pj_livre/Document/database_setup.sql
-
-# Ou avec PostgreSQL
-psql -U postgres -f Pj_livre/Document/database_setup.sql
+java -Xmx512m -Xms256m -Dfile.encoding=UTF-8 -Duser.timezone=UTC -jar dist/Pj_livre.jar
 ```
-
-**Sous Windows (Command Prompt) :**
-```cmd
-# Exemple avec MySQL
-mysql -u root -p < Pj_livre\Document\database_setup.sql
-
-# Via PowerShell
-Get-Content Pj_livre\Document\database_setup.sql | mysql -u root -p
-```
-
----
-
-## 🔐 Paramètres de Configuration
-
-Éditez les fichiers de configuration si nécessaire avant le déploiement :
-
-- **Fichier de propriétés** : `Pj_livre/nbproject/project.properties`
-- **Paramètres JVM** : Modifiez les valeurs `-Xmx` et `-Xms` selon votre disponibilité mémoire
 
 ---
 
@@ -179,27 +244,87 @@ Get-Content Pj_livre\Document\database_setup.sql | mysql -u root -p
 ### Sous Linux/macOS
 
 ```bash
-# Vérifier que l'application démarre sans erreur
+# Lancer l'application
 java -jar Pj_livre/dist/Pj_livre.jar &
 
-# Afficher les logs
+# Afficher les logs en temps réel
 tail -f application.log
 
 # Arrêter l'application
 killall java
+
+# Ou trouver le PID et l'arrêter
+ps aux | grep Pj_livre
+kill <PID>
 ```
 
 ### Sous Windows
 
 ```cmd
-# Vérifier que l'application démarre
+# Lancer l'application
 java -jar Pj_livre\dist\Pj_livre.jar
 
 # Arrêter l'application (Ctrl+C)
 ```
 
+### Points de vérification
+
+- L'application démarre sans erreur
+- La connexion à MariaDB est établie
+- L'interface graphique s'affiche correctement
+- Les différents rôles fonctionnent (Apprenant, Formateur, Gestionnaire, Admin)
+
 ---
 
 ## 📝 Dépannage
 
-| Problème | Solution |\n| --- | --- |\n| `ant: command not found` | Installer Apache Ant ou ajouter son chemin aux variables d'environnement PATH |\n| `java: command not found` | Installer le JDK ou ajouter son chemin aux variables d'environnement PATH |\n| `ClassNotFoundException` | Vérifier que le manifest.mf contient la classe principale correcte |\n| Problèmes de mémoire | Augmenter les paramètres `-Xmx` lors de l'exécution |\n| Problèmes de base de données | Vérifier la connexion et les identifiants de connexion |\n\n---\n\n## 📞 Support et Maintenance\n\nPour toute question ou problème de déploiement :\n- Consultez la documentation du projet\n- Vérifiez les logs d'erreur\n- Contactez l'équipe de développement\n\n---\n\n**Version du guide** : 1.0  \n**Dernière mise à jour** : 2026-05-25"
+| Problème | Cause | Solution |
+|----------|-------|----------|
+| `ant: command not found` | Apache Ant non installé | Installer Apache Ant ou ajouter son chemin aux variables PATH |
+| `javac: command not found` | JDK non installé | Installer le JDK 24+ ou ajouter son chemin aux variables PATH |
+| `ClassNotFoundException: pj_livre.Controllers.C_livre` | Classe principale non trouvée | Vérifier que la compilation s'est bien déroulée (fichier JAR corrompu) |
+| `Connection refused (MariaDB)` | MariaDB non accessible | Vérifier que MariaDB est démarré et accessible sur localhost:3306 |
+| `Access denied for user 'livre_user'` | Identifiants incorrects | Vérifier le nom d'utilisateur et le mot de passe MariaDB |
+| `Database 'livre_scolaire' not found` | Base de données n'existe pas | Exécuter les commandes SQL d'initialisation |
+| Erreur de mémoire insuffisante | Mémoire allouée insuffisante | Augmenter la valeur de `-Xmx` (ex: `-Xmx1024m`) |
+| Problèmes d'encodage des caractères | Encodage UTF-8 non configuré | Utiliser `-Dfile.encoding=UTF-8` lors de l'exécution |
+
+---
+
+## 🏗️ Architecture de l'Application
+
+- **Type** : Application lourde (Desktop)
+- **Architecture** : MVC (Model-View-Controller)
+- **Base de données** : MariaDB
+- **Classe principale** : `pj_livre.Controllers.C_livre`
+- **Dépendances** : 
+  - MariaDB JDBC Driver (`mariadb-java-client-3.5.6.jar`)
+  - JCalendar (`jcalendar-1.4.jar`)
+  - Spring Framework 5.0.0
+
+---
+
+## 👥 Gestion des Droits et Rôles
+
+L'application implémente 4 rôles :
+
+1. **Apprenant** : Consultation des livres empruntés et infos de paiement
+2. **Formateur/Enseignant** : Consultation des livres par étudiant (lecture seule)
+3. **Gestionnaire** : Gestion complète des emprunts, retours, paiements
+4. **Administrateur** : Accès complet, gestion des utilisateurs et rôles
+
+---
+
+## 📞 Support et Maintenance
+
+Pour toute question ou problème de déploiement :
+- Consultez le fichier `Pj_livre/Document/Contexte.txt` pour le contexte du projet
+- Consultez le MCD dans `Pj_livre/Document/mcd_bourse_livres.pdf` pour la structure de la base de données
+- Vérifiez les logs d'erreur lors du démarrage
+- Contactez l'équipe de développement
+
+---
+
+**Version du guide** : 2.0  
+**Dernière mise à jour** : 2026-05-25  
+**Basé sur** : Configuration du projet - JDK 24, MariaDB 10.5+, Ant 1.10+
