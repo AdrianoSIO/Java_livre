@@ -1,3 +1,0 @@
-pj_reservresto_ac.Db_mariadb
-pj_livre.Db_mariadb
-pj_reservation.Db_mariadb
