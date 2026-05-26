@@ -1,7 +1,7 @@
 # Java_livre
 
 Présentation du projet
-
+Le guide d'install est dans le dossier Document du dossier Document
 Cette application a pour objectif de gérer le cycle de vie des manuels scolaires mis à disposition des apprenants au sein d’un campus. Elle permet l’achat des manuels, leur attribution aux étudiants, le suivi des emprunts, le rachat et le retour des livres en fin d’année, ainsi qu’un suivi financier détaillé.
 
 L’application vise à offrir un suivi standardisé sur plusieurs années et une meilleure lisibilité financière pour l’ensemble des utilisateurs.
